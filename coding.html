@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coding Notes</title>
+
+  <!-- Highlight.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    h1 {
+      background: #4CAF50;
+      color: white;
+      margin: 0 -20px 20px -20px;
+      padding: 20px;
+      font-size: 28px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"],
+    textarea {
+      width: 80%;
+      max-width: 600px;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #4CAF50;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #codes {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #codes div {
+      background: white;
+      width: 100%;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    #codes h3 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #4CAF50;
+    }
+
+    #codes pre {
+      background: #2d2d2d;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: monospace;
+    }
+
+    /* ✅ Password Modal */
+    #passwordModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    #passwordBox {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #passwordBox input {
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 2px solid #ccc;
+      margin-top: 10px;
+    }
+
+    #passwordBox button {
+      margin-top: 15px;
+      width: 100%;
+    }
+  </style>
+
+</head>
+<body>
+  <!-- ✅ Password Modal -->
+  <div id="passwordModal">
+    <div id="passwordBox">
+      <h2>🔐 Enter Password</h2>
+      <input type="password" id="passwordInput" placeholder="Enter password">
+      <button onclick="checkPassword()">Submit</button>
+    </div>
+  </div>
+
+  <h1>Coding Notes</h1>
+  <input type="text" id="codeName" placeholder="Code Name"><br><br>
+  <textarea id="codeContent" rows="10" placeholder="Paste your code here..."></textarea><br><br>
+  <button onclick="saveCode()"> Save Code</button>
+  <hr>
+  <div id="codes"></div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbz9rMdqHW4DQQhMg_GGX9aPbqEiJqfffpl_9QYKdjQN9-GS54kikgJak3sFKH4yJiHE/exec";
+
+    function checkPassword() {
+      const entered = document.getElementById('passwordInput').value;
+      if (entered === "2005") {
+        document.getElementById('passwordModal').style.display = 'none';
+        displayCodes();
+      } else {
+        alert("❌ Incorrect password!");
+      }
+    }
+
+    function saveCode() {
+      const codeName = document.getElementById('codeName').value;
+      const codeContent = document.getElementById('codeContent').value;
+
+      if (codeName && codeContent) {
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify({ action: "add", name: codeName, content: codeContent }),
+          headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert("✅ Code saved!");
+          document.getElementById('codeName').value = '';
+          document.getElementById('codeContent').value = '';
+          displayCodes();
+        });
+      } else {
+        alert("⚠ Fill both fields!");
+      }
+    }
+
+    function displayCodes() {
+      fetch(scriptURL)
+        .then(res => res.json())
+        .then(data => {
+          const codesDiv = document.getElementById('codes');
+          codesDiv.innerHTML = '';
+          data.forEach((item) => {
+            const div = document.createElement('div');
+
+            const title = document.createElement('h3');
+            title.textContent = item.name;
+
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = item.content;
+            code.className = "language-javascript";
+            pre.appendChild(code);
+
+            div.appendChild(title);
+            div.appendChild(pre);
+
+            codesDiv.appendChild(div);
+          });
+
+          setTimeout(() => {
+            hljs.highlightAll();
+          }, 100);
+        });
+    }
+  </script>
+</body>
+</html>
