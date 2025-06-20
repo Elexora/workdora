@@ -2,19 +2,22 @@
 <html>
 <head>
   <title>Work Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f7f9fc;
       padding: 20px;
       text-align: center;
+      margin: 0;
     }
 
     h1 {
-      background: green;
+      background: aqua;
       color: white;
       padding: 15px;
-      margin: -20px -20px 20px -20px;
+      margin: 0 0 20px 0;
+      font-size: 26px;
     }
 
     input, textarea {
@@ -33,7 +36,7 @@
     }
 
     button {
-      background: green;
+      background: aqua;
       color: white;
       border: none;
       padding: 10px 20px;
@@ -45,7 +48,7 @@
     }
 
     button:hover {
-      background: green;
+      background: aqua;
     }
 
     #notes {
@@ -71,7 +74,7 @@
       position: absolute;
       top: 10px;
       right: 15px;
-      background: green;
+      background:aqua;
       color: white;
       border: none;
       border-radius: 5px;
@@ -79,7 +82,7 @@
       cursor: pointer;
     }
 
-    /* Modal Style */
+    /* 🔐 Modal Style */
     .modal {
       display: flex;
       justify-content: center;
@@ -96,6 +99,8 @@
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       text-align: center;
+      width: 90%;
+      max-width: 300px;
     }
 
     .modal-content input {
@@ -103,11 +108,43 @@
       margin-top: 15px;
     }
 
+    /* ✅ Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+        padding: 12px;
+      }
+
+      input, textarea {
+        width: 95%;
+        font-size: 14px;
+      }
+
+      button {
+        width: 95%;
+        font-size: 15px;
+      }
+
+      #notes div {
+        width: 95%;
+        font-size: 14px;
+        padding: 12px;
+      }
+
+      .delete-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+
+      .modal-content {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
 
-<!-- Modal Password -->
+<!-- 🔐 Password Modal -->
 <div id="passwordModal" class="modal">
   <div class="modal-content">
     <h2>Enter Password</h2>
@@ -121,16 +158,28 @@
 <input type="text" id="userName" placeholder="Your Name"><br>
 <textarea id="noteContent" placeholder="Write your work note here..."></textarea><br>
 <button onclick="saveNote()">Save Note</button>
+
 <hr>
 <div id="notes"></div>
 
 <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbyHJiCn5DMQJJ-rrYOfvqQ8OyC9q88ePuqnl32aK0nAZp9bQIAesIp7hHOMXFMki9kUyg/exec"; // Replace this with your Apps Script Web App URL
+  const scriptURL = "https://script.google.com/macros/s/AKfycbyHJiCn5DMQJJ-rrYOfvqQ8OyC9q88ePuqnl32aK0nAZp9bQIAesIp7hHOMXFMki9kUyg/exec";
 
-  // Password protection
+  // ✅ Auto focus + Enter key unlock
+  window.onload = () => {
+    const passwordInput = document.getElementById("passwordInput");
+    passwordInput.focus();
+    passwordInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        checkPassword();
+      }
+    });
+  };
+
+  // ✅ Password check
   function checkPassword() {
     const password = document.getElementById("passwordInput").value;
-    if (password === "2005") {
+    if (password === "00000008") {
       document.getElementById("passwordModal").style.display = "none";
       fetchNotes();
     } else {
@@ -138,6 +187,7 @@
     }
   }
 
+  // ✅ Save note to Google Sheet
   function saveNote() {
     const name = document.getElementById("userName").value.trim();
     const note = document.getElementById("noteContent").value.trim();
@@ -164,6 +214,7 @@
     .catch(err => alert("Error: " + err));
   }
 
+  // ✅ Fetch all notes from Google Sheet
   function fetchNotes() {
     fetch(scriptURL + "?action=read")
       .then(res => res.json())
@@ -184,6 +235,7 @@
       });
   }
 
+  // ✅ Delete note
   function deleteNote(id) {
     const formData = new FormData();
     formData.append("action", "delete");
