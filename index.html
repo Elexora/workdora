@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,15 +25,16 @@
 
     .icon-container {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
-      margin-top: 50px;
-      gap: 30px;
-      padding: 20px;
+      justify-content: center;
+      max-width: 500px;
+      margin: 50px auto;
+      gap: 20px;
+      padding: 0 20px;
     }
 
     .icon {
-      width: 120px;
+      width: 45%;
       height: 120px;
       background: white;
       display: flex;
@@ -53,7 +55,6 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
 
-    /* ✅ Password Modal Styles */
     #passwordModal {
       position: fixed;
       top: 0; left: 0;
@@ -104,12 +105,31 @@
     #passwordBox button:hover {
       background: #45a049;
     }
+
+    /* ✅ Mobile: Keep 2x2 layout */
+    @media screen and (max-width: 600px) {
+      .icon {
+        width: 45%;
+        height: 100px;
+        font-size: 14px;
+      }
+
+      h1 {
+        font-size: 22px;
+        padding: 15px;
+      }
+
+      .icon-container {
+        gap: 15px;
+        margin-top: 30px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- ✅ Password Modal -->
+  <!-- 🔐 Password Modal -->
   <div id="passwordModal">
     <div id="passwordBox">
       <h2>🔐 Enter Password</h2>
@@ -128,6 +148,17 @@
   </div>
 
   <script>
+    window.onload = () => {
+      const passwordInput = document.getElementById("passwordInput");
+      passwordInput.focus();
+
+      passwordInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          checkPassword();
+        }
+      });
+    };
+
     function checkPassword() {
       const enteredPassword = document.getElementById("passwordInput").value;
       if (enteredPassword === "88888888") {
