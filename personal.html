@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Work Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      padding: 20px;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      background: aqua;
+      color: white;
+      padding: 15px;
+      margin: 0 0 20px 0;
+      font-size: 26px;
+    }
+
+    input, textarea {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    textarea {
+      height: 120px;
+    }
+
+    button {
+      background: green;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #038503;
+    }
+
+    #notes {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #notes div {
+      background: white;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: left;
+      position: relative;
+    }
+
+    /* 🔐 Modal Style */
+    .modal {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      z-index: 999;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 90%;
+      max-width: 300px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    /* ✅ Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+        padding: 12px;
+      }
+
+      input, textarea {
+        width: 95%;
+        font-size: 14px;
+      }
+
+      button {
+        width: 95%;
+        font-size: 15px;
+      }
+
+      #notes div {
+        width: 95%;
+        font-size: 14px;
+        padding: 12px;
+      }
+
+      .modal-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🔐 Password Modal -->
+<div id="passwordModal" class="modal">
+  <div class="modal-content">
+    <h2>Enter Password</h2>
+    <input type="password" id="passwordInput" placeholder="Enter password">
+    <button onclick="checkPassword()">Submit</button>
+  </div>
+</div>
+
+<h1>Work Notes</h1>
+
+<input type="text" id="userName" placeholder="Your Name"><br>
+<textarea id="noteContent" placeholder="Write your work note here..."></textarea><br>
+<button onclick="saveNote()">Save Note</button>
+
+<hr>
+<div id="notes"></div>
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbyHJiCn5DMQJJ-rrYOfvqQ8OyC9q88ePuqnl32aK0nAZp9bQIAesIp7hHOMXFMki9kUyg/exec";
+
+  // ✅ Auto focus + Enter key unlock
+  window.onload = () => {
+    const passwordInput = document.getElementById("passwordInput");
+    passwordInput.focus();
+    passwordInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        checkPassword();
+      }
+    });
+  };
+
+  // ✅ Password check
+  function checkPassword() {
+    const password = document.getElementById("passwordInput").value;
+    if (password === "032005") {
+      document.getElementById("passwordModal").style.display = "none";
+      fetchNotes();
+    } else {
+      alert("Incorrect password!");
+    }
+  }
+
+  // ✅ Save note to Google Sheet
+  function saveNote() {
+    const name = document.getElementById("userName").value.trim();
+    const note = document.getElementById("noteContent").value.trim();
+    if (!name || !note) {
+      alert("Please fill both name and note.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("action", "add");
+    formData.append("name", name);
+    formData.append("note", note);
+
+    fetch(scriptURL, {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.text())
+    .then(() => {
+      document.getElementById("userName").value = "";
+      document.getElementById("noteContent").value = "";
+      fetchNotes();
+    })
+    .catch(err => alert("Error: " + err));
+  }
+
+  // ✅ Fetch all notes from Google Sheet
+  function fetchNotes() {
+    fetch(scriptURL + "?action=read")
+      .then(res => res.json())
+      .then(data => {
+        const notesDiv = document.getElementById("notes");
+        notesDiv.innerHTML = "";
+
+        data.reverse().forEach(row => {
+          const [id, name, note] = row;
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${name}</strong><br>
+            <p>${note}</p>
+          `;
+          notesDiv.appendChild(div);
+        });
+      });
+  }
+</script>
+
+</body>
+</html>
